@@ -32,7 +32,7 @@ config.json
 ```
 
 ## Logs
-Logfile: /var/log/ddnsclient/ddns_update.log
+Logfile: /var/log/ddnsclient/ddns_update.log  
 Logrotate config: /etc/logrotate.d/ddns_update
 ```
 /var/log/ddnsclient/ddns_update.log {
