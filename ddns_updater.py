@@ -37,14 +37,16 @@ def release_lock(lock_file):
 def get_external_ipv4():
     try:
         return subprocess.check_output(['./ipv4.sh']).decode().strip()
-    except subprocess.CalledProcessError:
+    except Exception as e:
+        logging.error(f"Failed to get IPv4: {e}")
         return None
 
 # Function to get the IPv6 prefix
 def get_ipv6_prefix():
     try:
         return subprocess.check_output(['./ipv6_prefix.sh']).decode().strip()
-    except subprocess.CalledProcessError:
+    except Exception as e:
+        logging.error(f"Failed to get IPv6: {e}")
         return None
 
 def update_multiple(ipv4, ipv6_prefix, username, password, hosts):
