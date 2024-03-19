@@ -30,3 +30,18 @@ config.json
     }
 }
 ```
+
+## Logs
+Logfile: /var/log/ddnsclient/ddns_update.log
+Logrotate config: /etc/logrotate.d/ddns_update
+```
+/var/log/ddnsclient/ddns_update.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 root root
+}
+```
