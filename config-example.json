@@ -1,10 +1,7 @@
 {
-    "comment": "\/ dyndns Username",
     "example.com": {
-        "comment": "\/ dyndns Password",
         "password": "abcdefg",
         "hosts": {
-            "hostname": "suffix of host beginning with :",
             "example.com": ":abcd:efab:cdef:abcd",
             "sub.example.com": ":1234:5678:9012:3456",
             "affe.example.com": ":affe:affe:affe:affe"
