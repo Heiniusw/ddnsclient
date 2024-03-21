@@ -15,7 +15,7 @@ LOGGING_LEVEL = logging.INFO
 logging.basicConfig(
         filename='/var/log/ddnsclient/ddns_update.log',
         level=LOGGING_LEVEL,
-        format='%(asctime)s - %(levelname)s > %(message)s', datefmt="%Y-%m-%d %I:%M:%S"
+        format='%(asctime)s - %(levelname)s > %(message)s', datefmt="%Y-%m-%d %H:%M:%S"
     )
 
 def acquire_lock():
