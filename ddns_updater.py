@@ -70,7 +70,7 @@ def update_dyndns2(ipv4, ipv6, username, password, hostname):
     response = subprocess.check_output(['curl', '-s', url]).decode()
     #response = url
 
-    logging.info(response)
+    logging.info(hostname + ": " + response.strip())
     return response
 
 # Function to read configuration from file
