@@ -19,20 +19,50 @@ Edit via crontab -e
 config.json
 ```json:
 {
-    "example.com": {
-        "password": "abcdefg",
-        "hosts": {
-            "example.com": ":abcd:efab:cdef:abcd",
-            "sub.example.com": ":1234:5678:9012:3456",
-            "affe.example.com": ":affe:affe:affe:affe"
+    "version": "1",
+    "log_file": "/var/log/ddnsclient/ddns_update.log",
+    "logging_level": "INFO",
+    "modules": {
+        "ipv4": {
+            "command": "bash",
+            "script": "./modules/ipv4-fritzbox.sh"
+        },
+        "ipv6": {
+            "command": "bash",
+            "script": "./modules/ipv6_prefix.sh"
         }
     },
-    "example.net": {
-        "password": "1234567890",
-        "hosts": {
-            "example.net": ":1234:4321:1234:4321"
+    "providers": [
+        {
+            "providerHost": "dyndns.host.com/nic/update",
+            "username": "example.com",
+            "password": "abcdefg",
+            "domains": [
+                {
+                    "name": "example.com",
+                    "ipv6_suffix": "abcd:efab:cdef:abcd"
+                },
+                {
+                    "name": "sub.example.com",
+                    "ipv6_suffix": "1234:5678:9012:3456"
+                },
+                {
+                    "name": "affe.example.com"
+                }
+            ]
+        },
+        {
+            "providerHost": "dyndns.host2.com/nic/update",
+            "username": "example.net",
+            "password": "1234567890",
+            "domains": [
+                {
+                    "name": "example.net",
+                    "ipv6_suffix": "1234:4321:1234:4321"
+                }
+            ]
         }
-    }
+    ]
 }
 ```
 
