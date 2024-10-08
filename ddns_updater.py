@@ -7,6 +7,7 @@ import os
 import logging
 
 CONFIG_FILE = "config.json"
+CONFIG_VERSION = "1"
 CACHE_FILE = "cached_info.json"
 LOCK_FILE = "ddns_updater.lock"
 LOGGING_LEVELS = {
@@ -64,32 +65,36 @@ def execute_script(module):
         return None
 
 def update(config, ipv4, ipv6_prefix):
-    logging.info("IP addresses have changed. Updating DynDNS2...")
-    for username, data in config['domains'].items():
-        update_domain(ipv4, ipv6_prefix, username, data['password'], data['hosts'])
-    logging.info("DynDNS2 update successful.")
+    logging.info("IP addresses have changed. Updating DynDNS...")
+    for provider in config['providers']:
+        update_domain(ipv4, ipv6_prefix, provider['username'], provider['password'], provider['providerHost'], provider['domains'])
+    logging.info("DynDNS update successful.")
 
-def update_domain(ipv4, ipv6_prefix, username, password, hosts):
-    for hostname, suffix in hosts.items():
-        ipv6 = ipv6_prefix + ":" + suffix if ipv6_prefix and suffix else None
-        send_dyndns2_request(ipv4, ipv6, username, password, hostname)
+def update_domain(ipv4, ipv6_prefix, username, password, provider_host, domains):
+    for domain in domains:
+        ipv6 = None
+        if 'ipv6_suffix' in domain and domain['ipv6_suffix']:
+            ipv6 = ipv6_prefix + ":" + domain['ipv6_suffix'] if ipv6_prefix else None
 
-def send_dyndns2_request(ipv4, ipv6, username, password, hostname):
+        send_dyndns2_request(ipv4, ipv6, username, password, provider_host, domain['name'])
+
+def send_dyndns2_request(ipv4, ipv6, username, password, provider_host, hostname):
     logging.debug(ipv4)
     logging.debug(ipv6)
-    ips = ""
+    ips = []
     if ipv4:
-        ips = ipv4
+        ips.append(ipv4)
     if ipv6:
-        if ips:
-            ips += "," + ipv6
-        else:
-            ips = ipv6
-    url = f"https://{username}:{password}@dyndns.strato.com/nic/update?hostname={hostname}&myip={ips}"
-    response = subprocess.check_output(['curl', '-s', url]).decode()
-
-    logging.info(hostname + ": " + response.strip())
-    return response
+        ips.append(ipv6)
+    
+    # Prepare the URL for the update
+    url = f"https://{username}:{password}@{provider_host}?hostname={hostname}&myip={','.join(ips)}"
+    
+    try:
+        response = subprocess.check_output(['curl', '-s', url]).decode()
+        logging.info(f"{hostname}: {response.strip()}")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Failed to update {hostname}: {e.output.decode().strip()}")
 
 def write_json(config, filename='config.ini'):
     with open(filename, 'w') as f:
@@ -98,9 +103,11 @@ def write_json(config, filename='config.ini'):
 def main():
     # Read Config
     config = read_json(CONFIG_FILE)
+    version = config.get("version", "unknown version")
     if not config:
-        logging.error(f"Invalid Config File: {CONFIG_FILE}")
-        sys.exit()
+        raise Exception(f"Invalid Config File: {CONFIG_FILE}")
+    if version != CONFIG_VERSION:
+        raise Exception(f"Config version mismatch: expected {CONFIG_VERSION}, got {version}")
 
     # Setup Logging
     log_file = config.get("log_file", "/var/log/ddnsclient/ddns_update.log")
@@ -118,15 +125,17 @@ def main():
     current_ipv6_prefix = cache.get("ipv6_prefix")
 
     # Get Current IPs
-    ipv4_module = config["modules"]["ipv4"]
-    ipv6_prefix_module = config["modules"]["ipv6_prefix"]
+    ipv4_module = config["modules"].get("ipv4")
+    if ipv4_module:
+        new_ipv4 = execute_script(ipv4_module) or None
+        if not new_ipv4:
+            logging.warning(f"IPv4 address is {new_ipv4}")
 
-    new_ipv4 = execute_script(ipv4_module) or None
-    if not new_ipv4:
-        logging.warning(f"IPv4 address is {new_ipv4}")
-    new_ipv6_prefix = execute_script(ipv6_prefix_module) or None
-    if not new_ipv6_prefix:
-        logging.warning(f"IPv6 prefix is {new_ipv6_prefix}")
+    ipv6_module = config["modules"].get("ipv6")
+    if ipv6_module:
+        new_ipv6_prefix = execute_script(ipv6_module) or None
+        if not new_ipv6_prefix:
+            logging.warning(f"IPv6 prefix is {new_ipv6_prefix}")
 
     # Debug
     logging.debug(f"Cache: IPv4 = {current_ipv4}, IPv6 = {current_ipv6_prefix}")

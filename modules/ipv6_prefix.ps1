@@ -8,4 +8,6 @@ $IPAddress = Get-NetIPAddress -AddressFamily IPv6 | Where-Object {
 if ($IPAddress) {
     $ipv6Prefix = $IPAddress.IPAddress.Split(':') -join ':' -replace "(?<=::).*", "" -replace "(:0)+$", ":"
     Write-Host $ipv6Prefix
+} else {
+    exit 0  # No IP found, exit gracefully
 }
