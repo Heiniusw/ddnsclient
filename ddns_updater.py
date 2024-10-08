@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 import subprocess
 import sys
-import fcntl
+from filelock import FileLock
 import os
 import logging
 
@@ -24,11 +24,11 @@ def ensure_directory(file_path):
         logging.info(f"Created directory: {directory}")
 
 def configure_logging(log_file, logging_level_str):
-    ensure_log_directory(log_file)
+    ensure_directory(log_file)
     logging_level = LOGGING_LEVELS.get(logging_level_str.upper(), logging.INFO)
     logging.basicConfig(
         filename=log_file,
-        level=LOGGING_LEVEL,
+        level=logging_level,
         format='%(asctime)s - %(levelname)s > %(message)s',
         datefmt="%Y-%m-%d %H:%M:%S"
     )
@@ -42,17 +42,16 @@ def read_json(filename):
         return {}
 
 def acquire_lock():
+    lock = FileLock(LOCK_FILE)
     try:
-        lock_file = open(LOCK_FILE, "w")
-        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        return lock_file
-    except IOError:
-        logging.error("Another instance of the script is running. Exiting.")
-        sys.exit(1)
+        lock.acquire(timeout=1)
+        return lock
+    except Exception as e:
+        logging.error(f"Failed to acquire lock: {e}")
+        return None
 
-def release_lock(lock_file):
-    fcntl.flock(lock_file, fcntl.LOCK_UN)
-    lock_file.close()
+def release_lock(lock):
+    lock.release()
 
 def execute_script(script):
     try:
@@ -61,6 +60,12 @@ def execute_script(script):
     except Exception as e:
         logging.error(f"Failed to execute {script}: {e}")
         return None
+
+def update(config, ipv4, ipv6_prefix):
+    logging.info("IP addresses have changed. Updating DynDNS2...")
+    for username, data in config['domains'].items():
+        update_domain(ipv4, ipv6_prefix, username, data['password'], data['hosts'])
+    logging.info("DynDNS2 update successful.")
 
 def update_domain(ipv4, ipv6_prefix, username, password, hosts):
     for hostname, suffix in hosts.items():
@@ -88,15 +93,12 @@ def write_json(config, filename='config.ini'):
     with open(filename, 'w') as f:
         json.dump(config, f, indent=4)
 
-def update(config, ipv4, ipv6_prefix):
-    logging.info("IP addresses have changed. Updating DynDNS2...")
-    for username, data in config['domains'].items():
-        update_domain(ipv4, ipv6_prefix, username, data['password'], data['hosts'])
-    logging.info("DynDNS2 update successful.")
-
 def main():
     # Read Config
     config = read_json(CONFIG_FILE)
+    if not config:
+        logging.error(f"Invalid Config File: {CONFIG_FILE}")
+        sys.exit()
 
     # Setup Logging
     log_file = config.get("log_file", "/var/log/ddnsclient/ddns_update.log")

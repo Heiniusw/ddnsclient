@@ -3,6 +3,9 @@ A ipv4 and ipv6 DynDNS client for multiple Hosts.
 
 It takes the current ipv4 address from ipv4.sh and the current ipv6 prefix from ipv6_prefix.sh. If it detects a change of a ip compared to the cache it updates the ips.
 
+## Install Packages
+`pip install -r requirements.txt`
+
 ## Example Crontab
 Edit via crontab -e
 ```
