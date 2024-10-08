@@ -2,6 +2,7 @@
     "version": "1",
     "log_file": "/var/log/ddnsclient/ddns_update.log",
     "logging_level": "INFO",
+    "log_rotation": true,
     "modules": {
         "ipv4": {
             "command": "bash",

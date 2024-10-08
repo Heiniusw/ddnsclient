@@ -16,7 +16,19 @@ Edit via crontab -e
 ```
 
 ## Config
-config.json
+`config.json`
+### Logging Levels
+DEBUG INFO WARNING ERROR CRITICAL
+
+### Modules
+IPv4 und IPv6. Remove to disable the Version. Requires a Command and a Script path.
+
+### Providers
+A Array of DynDNS Providers with its Hostname, Username and Password.
+It also contains a list of Domains wich should be updated. A Hostname is required and the IPv6 Suffix is optional.
+
+### Templates
+#### Linux
 ```json:
 {
     "version": "1",
@@ -65,9 +77,41 @@ config.json
     ]
 }
 ```
+#### Windows
+```json:
+{
+    "version": "1",
+    "log_file": "C:\\TEMP\\ddns_update.log",
+    "logging_level": "INFO",
+    "log_rotation": true,
+    "modules": {
+        "ipv4": {
+            "command": "powershell",
+            "script": "./modules/ipv4-fritzbox.sh"
+        },
+        "ipv6": {
+            "command": "powershell",
+            "script": "./modules/ipv6_prefix.sh"
+        }
+    },
+    "providers": [
+        {
+            "providerHost": "dyndns.host.com/nic/update",
+            "username": "example.com",
+            "password": "abcdefg",
+            "domains": [
+                {
+                    "hostname": "example.com",
+                    "ipv6_suffix": "abcd:efab:cdef:abcd"
+                }
+            ]
+        }
+    ]
+}
+```
 
 ## Logs
-Logfile: /var/log/ddnsclient/ddns_update.log  
+For Rotation set "log_rotation" to true or use Logrotate from Linux.
 Logrotate config: /etc/logrotate.d/ddns_update
 ```
 /var/log/ddnsclient/ddns_update.log {

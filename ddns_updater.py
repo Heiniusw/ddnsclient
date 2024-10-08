@@ -5,6 +5,7 @@ import sys
 from filelock import FileLock
 import os
 import logging
+from logging.handlers import RotatingFileHandler
 
 CONFIG_FILE = "config.json"
 CONFIG_VERSION = "1"
@@ -24,15 +25,26 @@ def ensure_directory(file_path):
         os.makedirs(directory)
         logging.info(f"Created directory: {directory}")
 
-def configure_logging(log_file, logging_level_str):
+def configure_logging(log_file, logging_level_str, log_rotation=False):
     ensure_directory(log_file)
     logging_level = LOGGING_LEVELS.get(logging_level_str.upper(), logging.INFO)
-    logging.basicConfig(
-        filename=log_file,
-        level=logging_level,
-        format='%(asctime)s - %(levelname)s > %(message)s',
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s > %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
+
+    # Create a stream handler for stdout and add it
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging_level)
+    stream_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(stream_handler)
+
+    # If log_file is specified, also log to the file
+    if log_file:
+        if log_rotation:
+            file_handler = RotatingFileHandler(log_file, maxBytes=10485760, backupCount=5)
+        else:
+            file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging_level)
+        file_handler.setFormatter(formatter)
+        logging.getLogger().addHandler(file_handler)
 
 def read_json(filename):
     try:
@@ -110,7 +122,8 @@ def main():
     # Setup Logging
     log_file = config.get("log_file", "/var/log/ddnsclient/ddns_update.log")
     logging_level = config.get("logging_level", "INFO")
-    configure_logging(log_file, logging_level)
+    log_rotation = config.get("log_rotation", False)
+    configure_logging(log_file, logging_level, log_rotation)
 
     # Aquire Lock
     lock_file = acquire_lock()
