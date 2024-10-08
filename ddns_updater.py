@@ -9,16 +9,23 @@ import logging
 CONFIG_FILE = "config.json"
 CACHE_FILE = "cached_info.json"
 LOCK_FILE = "ddns_updater.lock"
-LOGGING_LEVEL = logging.INFO
+LOGGING_LEVELS = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL
+}
 
-def ensure_directory(log_file_path):
-    log_dir = os.path.dirname(log_file_path)
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-        print(f"Created log directory: {log_dir}")
+def ensure_directory(file_path):
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        logging.info(f"Created directory: {directory}")
 
-def configure_logging(log_file):
+def configure_logging(log_file, logging_level_str):
     ensure_log_directory(log_file)
+    logging_level = LOGGING_LEVELS.get(logging_level_str.upper(), logging.INFO)
     logging.basicConfig(
         filename=log_file,
         level=LOGGING_LEVEL,
@@ -94,16 +101,19 @@ def update(config, ipv4, ipv6_prefix):
     logging.info("DynDNS2 update successful.")
 
 def main():
+    # Read Config
+    config = read_json(CONFIG_FILE)
+
     # Setup Logging
     log_file = config.get("log_file", "/var/log/ddnsclient/ddns_update.log")
-    configure_logging(log_file)
+    logging_level = config.get("logging_level", "INFO")
+    configure_logging(log_file, logging_level)
 
     # Aquire Lock
     lock_file = acquire_lock()
     logging.debug("Lock Acquired")
     
-    # Read Config and Cache
-    config = read_json(CONFIG_FILE)
+    # Read Cache
     cache = read_json(CACHE_FILE)
 
     # Get Script Paths

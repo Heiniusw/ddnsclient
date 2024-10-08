@@ -2,6 +2,7 @@
     "ipv4_script": "./modules/ipv4-fritzbox.sh",
     "ipv6_prefix_script": "./modules/ipv6_prefix.sh",
     "log_file": "/var/log/ddnsclient/ddns_update.log",
+    "logging_level": "INFO",
     "domains": {
         "example.com": {
             "password": "abcdefg",
