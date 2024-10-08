@@ -53,10 +53,12 @@ def acquire_lock():
 def release_lock(lock):
     lock.release()
 
-def execute_script(script):
+def execute_script(module):
+    command = module.get("command")
+    script = module.get("script")
     try:
-        logging.debug(f"Executing script: {script}")
-        return subprocess.check_output([script]).decode().strip()
+        logging.debug(f"Executing script: {script} with command: {command}")
+        return subprocess.check_output([command, script]).decode().strip()
     except Exception as e:
         logging.error(f"Failed to execute {script}: {e}")
         return None
@@ -107,22 +109,24 @@ def main():
 
     # Aquire Lock
     lock_file = acquire_lock()
-    logging.debug("Lock Acquired")
     
     # Read Cache
     cache = read_json(CACHE_FILE)
-
-    # Get Script Paths
-    ipv4_script = config.get("ipv4_script", "")
-    ipv6_prefix_script = config.get("ipv6_prefix_script", "")
 
     # Get Cached IPs
     current_ipv4 = cache.get("ipv4")
     current_ipv6_prefix = cache.get("ipv6_prefix")
 
     # Get Current IPs
-    new_ipv4 = execute_script(ipv4_script) or None
-    new_ipv6_prefix = execute_script(ipv6_prefix_script) or None
+    ipv4_module = config["modules"]["ipv4"]
+    ipv6_prefix_module = config["modules"]["ipv6_prefix"]
+
+    new_ipv4 = execute_script(ipv4_module) or None
+    if not new_ipv4:
+        logging.warning(f"IPv4 address is {new_ipv4}")
+    new_ipv6_prefix = execute_script(ipv6_prefix_module) or None
+    if not new_ipv6_prefix:
+        logging.warning(f"IPv6 prefix is {new_ipv6_prefix}")
 
     # Debug
     logging.debug(f"Cache: IPv4 = {current_ipv4}, IPv6 = {current_ipv6_prefix}")
