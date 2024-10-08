@@ -90,7 +90,7 @@ def send_dyndns2_request(ipv4, ipv6, username, password, provider_host, hostname
     try:
         response = requests.get(url, auth=(username, password))
         response.raise_for_status()
-        logging.info(f"{hostname}: {response.text.strip()}")
+        logging.info(f"Response for {hostname}: {response.text.strip()}")
     except requests.RequestException as e:
         logging.error(f"Failed to update {hostname}: {str(e)}")
 
