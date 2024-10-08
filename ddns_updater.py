@@ -65,36 +65,34 @@ def execute_script(module):
         return None
 
 def update(config, ipv4, ipv6_prefix):
-    logging.info("IP addresses have changed. Updating DynDNS...")
     for provider in config['providers']:
-        update_domain(ipv4, ipv6_prefix, provider['username'], provider['password'], provider['providerHost'], provider['domains'])
+        update_provider(ipv4, ipv6_prefix, provider['username'], provider['password'], provider['providerHost'], provider['domains'])
     logging.info("DynDNS update successful.")
 
-def update_domain(ipv4, ipv6_prefix, username, password, provider_host, domains):
+def update_provider(ipv4, ipv6_prefix, username, password, provider_host, domains):
     for domain in domains:
         ipv6 = None
         if 'ipv6_suffix' in domain and domain['ipv6_suffix']:
             ipv6 = ipv6_prefix + ":" + domain['ipv6_suffix'] if ipv6_prefix else None
 
-        send_dyndns2_request(ipv4, ipv6, username, password, provider_host, domain['name'])
+        send_dyndns2_request(ipv4, ipv6, username, password, provider_host, domain['hostname'])
 
 def send_dyndns2_request(ipv4, ipv6, username, password, provider_host, hostname):
-    logging.debug(ipv4)
-    logging.debug(ipv6)
     ips = []
     if ipv4:
         ips.append(ipv4)
     if ipv6:
         ips.append(ipv6)
     
-    # Prepare the URL for the update
-    url = f"https://{username}:{password}@{provider_host}?hostname={hostname}&myip={','.join(ips)}"
+    url = f"https://{provider_host}?hostname={hostname}&myip={','.join(ips)}"
+    logging.debug(f"Sending Request: {url}")
     
     try:
-        response = subprocess.check_output(['curl', '-s', url]).decode()
-        logging.info(f"{hostname}: {response.strip()}")
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Failed to update {hostname}: {e.output.decode().strip()}")
+        response = requests.get(url, auth=(username, password))
+        response.raise_for_status()
+        logging.info(f"{hostname}: {response.text.strip()}")
+    except requests.RequestException as e:
+        logging.error(f"Failed to update {hostname}: {str(e)}")
 
 def write_json(config, filename='config.ini'):
     with open(filename, 'w') as f:
@@ -153,6 +151,7 @@ def main():
     elif not config:
         logging.warning("Config is empty or None")
     else:
+        logging.info("IP addresses have changed. Updating DynDNS...")
         update(config, new_ipv4, new_ipv6_prefix)
         if new_ipv4:
             cache['ipv4'] = new_ipv4
