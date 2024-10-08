@@ -5,6 +5,8 @@ It takes the current ipv4 address from ipv4.sh and the current ipv6 prefix from 
 
 ## Install Packages
 `pip install -r requirements.txt`
+oder
+`sudo apt install python3-full python3-filelock`
 
 ## Example Crontab
 Edit via crontab -e
