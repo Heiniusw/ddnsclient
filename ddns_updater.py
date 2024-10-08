@@ -54,18 +54,12 @@ def release_lock(lock_file):
     fcntl.flock(lock_file, fcntl.LOCK_UN)
     lock_file.close()
 
-def get_external_ipv4(ipv4_script):
+def execute_script(script):
     try:
-        return subprocess.check_output([ipv4_script]).decode().strip()
+        logging.debug(f"Executing script: {script}")
+        return subprocess.check_output([script]).decode().strip()
     except Exception as e:
-        logging.error(f"Failed to get IPv4: {e}")
-        return None
-
-def get_ipv6_prefix(ipv6_prefix_script):
-    try:
-        return subprocess.check_output([ipv6_prefix_script]).decode().strip()
-    except Exception as e:
-        logging.error(f"Failed to get IPv6: {e}")
+        logging.error(f"Failed to execute {script}: {e}")
         return None
 
 def update_domain(ipv4, ipv6_prefix, username, password, hosts):
@@ -125,8 +119,8 @@ def main():
     current_ipv6_prefix = cache.get("ipv6_prefix")
 
     # Get Current IPs
-    new_ipv4 = get_external_ipv4(ipv4_script) or None
-    new_ipv6_prefix = get_ipv6_prefix(ipv6_prefix_script) or None
+    new_ipv4 = execute_script(ipv4_script) or None
+    new_ipv6_prefix = execute_script(ipv6_prefix_script) or None
 
     # Debug
     logging.debug(f"Cache: IPv4 = {current_ipv4}, IPv6 = {current_ipv6_prefix}")
