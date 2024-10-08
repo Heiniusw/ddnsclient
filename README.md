@@ -39,15 +39,15 @@ config.json
             "password": "abcdefg",
             "domains": [
                 {
-                    "name": "example.com",
+                    "hostname": "example.com",
                     "ipv6_suffix": "abcd:efab:cdef:abcd"
                 },
                 {
-                    "name": "sub.example.com",
+                    "hostname": "sub.example.com",
                     "ipv6_suffix": "1234:5678:9012:3456"
                 },
                 {
-                    "name": "affe.example.com"
+                    "hostname": "affe.example.com"
                 }
             ]
         },
@@ -57,7 +57,7 @@ config.json
             "password": "1234567890",
             "domains": [
                 {
-                    "name": "example.net",
+                    "hostname": "example.net",
                     "ipv6_suffix": "1234:4321:1234:4321"
                 }
             ]
