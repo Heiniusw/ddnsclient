@@ -136,6 +136,9 @@ def main():
     current_ipv6_prefix = cache.get("ipv6_prefix")
 
     # Get Current IPs
+    new_ipv4 = None
+    new_ipv6_prefix = None
+    
     ipv4_module = config["modules"].get("ipv4")
     if ipv4_module:
         new_ipv4 = execute_script(ipv4_module) or None
