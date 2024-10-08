@@ -26,12 +26,12 @@ def configure_logging(log_file):
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-def read_json(filename='config.ini'):
+def read_json(filename):
     try:
         with open(filename, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        logging.warning(f"Config file {filename} not found.")
+        logging.warning(f"File {filename} not found.")
         return {}
 
 def acquire_lock():
