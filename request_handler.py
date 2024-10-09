@@ -1,7 +1,7 @@
 import requests
 import logging
 
-logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def send_cloudflare_request(ipv4, ipv6_prefix, config):
     url = f"https://api.cloudflare.com/client/v4/zones/{config['zone_id']}/dns_records/"
@@ -10,36 +10,32 @@ def send_cloudflare_request(ipv4, ipv6_prefix, config):
         "X-Auth-Key": config['api_key']
     }
     payload = {
-            "comment": "Domain verification record",
-            "name": config['name'],
-            "proxied": True,
-            "settings": {},
-            "tags": [],
-            "ttl": 3600
+        "name": config['name'],
+        "proxied": True,
+        "settings": {},
+        "tags": [],
+        "ttl": 3600
     }
 
-    def send_request(ip, type, dns_record_id):
+    def send_request(ip, type, url, dns_record_id):
         url += dns_record_id
         payload.update({
             "content": ip,
             "type": type
         })
-        logging.debug(f"Sending Request: {url}, Payload = {payload}, Headers = {headers}")
+        logger.debug(f"Sending Request: {url}, Payload = {payload}, Headers = {headers}")
         try:
             response = requests.request("PUT", url, json=payload, headers=headers)
             response.raise_for_status()
-            logging.info(f"Response for {config['dns_record_id']} type {type}: {response.text.strip()}")
+            logger.info(f"Response for {config['dns_record_id']} type {type}: {response.text.strip()}")
         except requests.RequestException as e:
-            logging.error(f"Failed to update {config['dns_record_id']} type {type}: {str(e)}")
+            logger.error(f"Failed to update {config['dns_record_id']} type {type}: {str(e)}")
 
     if ipv4:
-        send_request(ipv4, 'A', config['dns_record_id_ipv4'])
+        send_request(ipv4, 'A', url, config['dns_record_id_ipv4'])
     
     if ipv6_prefix:
-        send_request(ipv6_prefix, 'AAAA', config['dns_record_id_ipv6'])
-
-
-
+        send_request(ipv6_prefix, 'AAAA', url, config['dns_record_id_ipv6'])
 
 def send_dyndns2_request(ipv4, ipv6_prefix, config):
     for domain in config['domains']:
@@ -53,16 +49,15 @@ def send_dyndns2_request(ipv4, ipv6_prefix, config):
         if ipv6:
             ips.append(ipv6)
         
-        url = f"https://{config['provider_host']}?hostname={config['hostname']}&myip={','.join(ips)}"
+        url = f"https://{config['provider_host']}?hostname={domain['hostname']}&myip={','.join(ips)}"
 
-        logging.debug(f"Sending Request: {url}")        
+        logger.debug(f"Sending Request: {url}")
         try:
             response = requests.get(url, auth=(config['username'], config['password']))
             response.raise_for_status()
-            logging.info(f"Response for {config['hostname']}: {response.text.strip()}")
+            logger.info(f"Response for {domain['hostname']}: {response.text.strip()}")
         except requests.RequestException as e:
-            logging.error(f"Failed to update {config['hostname']}: {str(e)}")
-
+            logger.error(f"Failed to update {domain['hostname']}: {str(e)}")
 
 def handle_request(ipv4, ipv6_prefix, provider, config):
     handlers = {"dyndnsv2": send_dyndns2_request, "cloudflare": send_cloudflare_request}

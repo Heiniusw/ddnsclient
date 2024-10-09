@@ -28,15 +28,20 @@ def ensure_directory(file_path):
 
 def configure_logging(log_file, logging_level_str, log_rotation=False):
     ensure_directory(log_file)
-    logging.getLogger(__name__)
+    
     logging_level = LOGGING_LEVELS.get(logging_level_str.upper(), logging.INFO)
+    
+    # Configure the root logger
+    logger = logging.getLogger()
+    logger.setLevel(logging_level)
+    
     formatter = logging.Formatter('%(asctime)s - %(levelname)s > %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
     # Create a stream handler for stdout and add it
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging_level)
     stream_handler.setFormatter(formatter)
-    logging.getLogger().addHandler(stream_handler)
+    logger.addHandler(stream_handler)
 
     # If log_file is specified, also log to the file
     if log_file:
@@ -46,7 +51,7 @@ def configure_logging(log_file, logging_level_str, log_rotation=False):
             file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging_level)
         file_handler.setFormatter(formatter)
-        logging.getLogger().addHandler(file_handler)
+        logger.addHandler(file_handler)
 
 def read_json(filename):
     try:
@@ -60,7 +65,6 @@ def acquire_lock():
     lock = FileLock(LOCK_FILE)
     try:
         lock.acquire(timeout=1)
-        return lock
     except Exception as e:
         logging.error(f"Failed to acquire lock: {e}")
         exit()
@@ -75,7 +79,7 @@ def execute_script(module):
         logging.debug(f"Executing script: {script} with command: {command}")
         return subprocess.check_output([command, script], timeout=30).decode().strip() or None
     except Exception as e:
-        logging.error(f"Failed to execute {script}: {e}")
+        logging.error(f"Failed to execute {script}: {str(e).strip()}")
         return None
 
 def update(providers, ipv4, ipv6_prefix):
