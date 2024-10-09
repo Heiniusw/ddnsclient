@@ -34,6 +34,7 @@ It also contains a list of Domains wich should be updated. A Hostname is require
     "version": "1",
     "log_file": "/var/log/ddnsclient/ddns_update.log",
     "logging_level": "INFO",
+    "log_rotation": true,
     "modules": {
         "ipv4": {
             "command": "bash",
@@ -44,8 +45,8 @@ It also contains a list of Domains wich should be updated. A Hostname is require
             "script": "./modules/ipv6_prefix.sh"
         }
     },
-    "providers": [
-        {
+    "providers": {
+        "dyndnsv2": {
             "providerHost": "dyndns.host.com/nic/update",
             "username": "example.com",
             "password": "abcdefg",
@@ -63,18 +64,13 @@ It also contains a list of Domains wich should be updated. A Hostname is require
                 }
             ]
         },
-        {
-            "providerHost": "dyndns.host2.com/nic/update",
-            "username": "example.net",
-            "password": "1234567890",
-            "domains": [
-                {
-                    "hostname": "example.net",
-                    "ipv6_suffix": "1234:4321:1234:4321"
-                }
-            ]
+        "cloudflare": {
+            "zone_id": "023e105f4ecef8ad9ca31a8372d0c353",
+            "dns_record_id": "023e105f4ecef8ad9ca31a8372d0c353",
+            "api_email": "123abc",
+            "ipv6_suffix": "1234:4321:1234:4321"
         }
-    ]
+    }
 }
 ```
 #### Windows
@@ -94,8 +90,8 @@ It also contains a list of Domains wich should be updated. A Hostname is require
             "script": "./modules/ipv6_prefix.sh"
         }
     },
-    "providers": [
-        {
+    "providers": {
+        "dyndnsv2": {
             "providerHost": "dyndns.host.com/nic/update",
             "username": "example.com",
             "password": "abcdefg",
@@ -106,7 +102,7 @@ It also contains a list of Domains wich should be updated. A Hostname is require
                 }
             ]
         }
-    ]
+    }
 }
 ```
 
