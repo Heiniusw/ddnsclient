@@ -86,11 +86,11 @@ It also contains a list of Domains wich should be updated. A Hostname is require
     "modules": {
         "ipv4": {
             "command": "powershell",
-            "script": "./modules/ipv4-fritzbox.sh"
+            "args": ["-ExecutionPolicy", "Bypass", "-File", "./modules/ipv4-fritzbox.sh"]
         },
         "ipv6": {
             "command": "powershell",
-            "script": "./modules/ipv6_prefix.sh"
+            "args": ["-ExecutionPolicy", "Bypass", "-File", "./modules/ipv6_prefix.sh"]
         }
     },
     "providers": {
