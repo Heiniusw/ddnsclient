@@ -65,6 +65,7 @@ def acquire_lock():
     lock = FileLock(LOCK_FILE)
     try:
         lock.acquire(timeout=1)
+        return lock
     except Exception as e:
         logging.error(f"Failed to acquire lock: {e}")
         exit()
