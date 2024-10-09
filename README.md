@@ -68,6 +68,7 @@ It also contains a list of Domains wich should be updated. A Hostname is require
             "zone_id": "023e105f4ecef8ad9ca31a8372d0c353",
             "dns_record_id_ipv4": "023e105f4ecef8ad9ca31a8372d0c353",
             "dns_record_id_ipv6": "023e105f4ecef8ad9ca31a8372d0c353",
+            "api_email": "max.musterman@example.com",
             "api_key": "123abc",
             "name": "example.com",
             "ipv6_suffix": "1234:4321:1234:4321"
