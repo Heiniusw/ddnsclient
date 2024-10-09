@@ -27,9 +27,9 @@ def send_cloudflare_request(ipv4, ipv6_prefix, config):
         try:
             response = requests.request("PUT", url, json=payload, headers=headers)
             response.raise_for_status()
-            logging.info(f"Response for {config['dns_record_id']}: {response.text.strip()}")
+            logging.info(f"Response for {config['dns_record_id']} type {type}: {response.text.strip()}")
         except requests.RequestException as e:
-            logging.error(f"Failed to update {config['dns_record_id']}: {str(e)}")
+            logging.error(f"Failed to update {config['dns_record_id']} type {type}: {str(e)}")
 
     if ipv4:
         send_request(ipv4, 'A')
