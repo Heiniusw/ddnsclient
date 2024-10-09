@@ -6,6 +6,7 @@ from filelock import FileLock
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+from request_handler import handle_request
 
 CONFIG_FILE = "config.json"
 CONFIG_VERSION = "1"
@@ -27,6 +28,7 @@ def ensure_directory(file_path):
 
 def configure_logging(log_file, logging_level_str, log_rotation=False):
     ensure_directory(log_file)
+    logging.getLogger(__name__)
     logging_level = LOGGING_LEVELS.get(logging_level_str.upper(), logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s > %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -61,7 +63,7 @@ def acquire_lock():
         return lock
     except Exception as e:
         logging.error(f"Failed to acquire lock: {e}")
-        return None
+        exit()
 
 def release_lock(lock):
     lock.release()
@@ -71,40 +73,15 @@ def execute_script(module):
     script = module.get("script")
     try:
         logging.debug(f"Executing script: {script} with command: {command}")
-        return subprocess.check_output([command, script]).decode().strip()
+        return subprocess.check_output([command, script], timeout=30).decode().strip() or None
     except Exception as e:
         logging.error(f"Failed to execute {script}: {e}")
         return None
 
-def update(config, ipv4, ipv6_prefix):
-    for provider in config['providers']:
-        update_provider(ipv4, ipv6_prefix, provider['username'], provider['password'], provider['providerHost'], provider['domains'])
+def update(providers, ipv4, ipv6_prefix):
+    for provider, config in providers.items():
+        handle_request(ipv4, ipv6_prefix, provider, config)
     logging.info("DynDNS update successful.")
-
-def update_provider(ipv4, ipv6_prefix, username, password, provider_host, domains):
-    for domain in domains:
-        ipv6 = None
-        if 'ipv6_suffix' in domain and domain['ipv6_suffix']:
-            ipv6 = ipv6_prefix + ":" + domain['ipv6_suffix'] if ipv6_prefix else None
-
-        send_dyndns2_request(ipv4, ipv6, username, password, provider_host, domain['hostname'])
-
-def send_dyndns2_request(ipv4, ipv6, username, password, provider_host, hostname):
-    ips = []
-    if ipv4:
-        ips.append(ipv4)
-    if ipv6:
-        ips.append(ipv6)
-    
-    url = f"https://{provider_host}?hostname={hostname}&myip={','.join(ips)}"
-    logging.debug(f"Sending Request: {url}")
-    
-    try:
-        response = requests.get(url, auth=(username, password))
-        response.raise_for_status()
-        logging.info(f"Response for {hostname}: {response.text.strip()}")
-    except requests.RequestException as e:
-        logging.error(f"Failed to update {hostname}: {str(e)}")
 
 def write_json(config, filename='config.ini'):
     with open(filename, 'w') as f:
@@ -168,7 +145,7 @@ def main():
         logging.warning("Config is empty or None")
     else:
         logging.info("IP addresses have changed. Updating DynDNS...")
-        update(config, new_ipv4, new_ipv6_prefix)
+        update(config['providers'], new_ipv4, new_ipv6_prefix)
         if new_ipv4:
             cache['ipv4'] = new_ipv4
         if new_ipv6_prefix:
