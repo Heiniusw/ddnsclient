@@ -4,21 +4,22 @@ import logging
 logging.getLogger(__name__)
 
 def send_cloudflare_request(ipv4, ipv6_prefix, config):
-    url = f"https://api.cloudflare.com/client/v4/zones/{config['zone_id']}/dns_records/{config['dns_record_id']}"
+    url = f"https://api.cloudflare.com/client/v4/zones/{config['zone_id']}/dns_records/"
     headers = {
         "Content-Type": "application/json",
-        "X-Auth-Email": config['api_email']
+        "X-Auth-Key": config['api_key']
     }
     payload = {
             "comment": "Domain verification record",
-            "name": "example.com",
+            "name": config['name'],
             "proxied": True,
             "settings": {},
             "tags": [],
             "ttl": 3600
     }
 
-    def send_request(ip, type):
+    def send_request(ip, type, dns_record_id):
+        url += dns_record_id
         payload.update({
             "content": ip,
             "type": type
@@ -32,10 +33,10 @@ def send_cloudflare_request(ipv4, ipv6_prefix, config):
             logging.error(f"Failed to update {config['dns_record_id']} type {type}: {str(e)}")
 
     if ipv4:
-        send_request(ipv4, 'A')
+        send_request(ipv4, 'A', config['dns_record_id_ipv4'])
     
     if ipv6_prefix:
-        send_request(ipv6_prefix, 'AAAA')
+        send_request(ipv6_prefix, 'AAAA', config['dns_record_id_ipv6'])
 
 
 
