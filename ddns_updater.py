@@ -75,12 +75,13 @@ def release_lock(lock):
 
 def execute_script(module):
     command = module.get("command")
-    script = module.get("script")
+    args = module.get("args", [])
+    
     try:
-        logging.debug(f"Executing script: {script} with command: {command}")
-        return subprocess.check_output([command, script], timeout=30).decode().strip() or None
+        logging.debug(f"Executing script: {args} with command: {command}")
+        return subprocess.check_output([command] + args, timeout=30).decode().strip() or None
     except Exception as e:
-        logging.error(f"Failed to execute {script}: {str(e).strip()}")
+        logging.error(f"Failed to execute {args}: {str(e).strip()}")
         return None
 
 def update(providers, ipv4, ipv6_prefix):
@@ -107,7 +108,7 @@ def main():
     log_rotation = config.get("log_rotation", False)
     configure_logging(log_file, logging_level, log_rotation)
 
-    # Aquire Lock
+    # Acquire Lock
     lock_file = acquire_lock()
     
     # Read Cache
@@ -143,7 +144,7 @@ def main():
     if new_ipv6_prefix == current_ipv6_prefix:
         new_ipv6_prefix = None
 
-    # Update IPs wich changed
+    # Update IPs which changed
     if new_ipv4 is None and new_ipv6_prefix is None:
         logging.debug("IPs are unchanged or None")
     elif not config:

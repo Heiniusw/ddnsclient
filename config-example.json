@@ -6,11 +6,11 @@
     "modules": {
         "ipv4": {
             "command": "bash",
-            "script": "./modules/ipv4-fritzbox.sh"
+            "args": ["./modules/ipv4-fritzbox.sh"]
         },
         "ipv6": {
             "command": "bash",
-            "script": "./modules/ipv6_prefix.sh"
+            "args": ["./modules/ipv6_prefix.sh"]
         }
     },
     "providers": {
