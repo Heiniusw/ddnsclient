@@ -7,6 +7,7 @@ def send_cloudflare_request(ipv4, ipv6_prefix, config):
     url = f"https://api.cloudflare.com/client/v4/zones/{config['zone_id']}/dns_records/"
     headers = {
         "Content-Type": "application/json",
+        "X-Auth-Email": config['auth_email'],
         "X-Auth-Key": config['api_key']
     }
     payload = {
