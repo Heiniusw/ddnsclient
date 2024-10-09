@@ -86,7 +86,7 @@ def execute_script(module):
 def update(providers, ipv4, ipv6_prefix):
     for provider, config in providers.items():
         handle_request(ipv4, ipv6_prefix, provider, config)
-    logging.info("DynDNS update successful.")
+    logging.info("DynDNS update Done.")
 
 def write_json(config, filename='config.ini'):
     with open(filename, 'w') as f:
