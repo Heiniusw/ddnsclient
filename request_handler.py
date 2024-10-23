@@ -34,7 +34,7 @@ def send_cloudflare_request(ipv4, ipv6_prefix, config):
 
     if ipv4:
         send_request(ipv4, 'A', url, config['dns_record_id_ipv4'])
-    
+
     if ipv6_prefix and 'ipv6_suffix' in config:
         ipv6 = ipv6_prefix + ":" + config['ipv6_suffix']
         send_request(ipv6, 'AAAA', url, config['dns_record_id_ipv6'])
@@ -50,8 +50,8 @@ def send_dyndns2_request(ipv4, ipv6_prefix, config):
             ips.append(ipv4)
         if ipv6:
             ips.append(ipv6)
-        
-        url = f"https://{config['provider_host']}?hostname={domain['hostname']}&myip={','.join(ips)}"
+
+        url = f"https://{config['providerHost']}?hostname={domain['hostname']}&myip={','.join(ips)}"
 
         logger.debug(f"Sending Request: {url}")
         try:

@@ -76,7 +76,7 @@ def release_lock(lock):
 def execute_script(module):
     command = module.get("command")
     args = module.get("args", [])
-    
+
     try:
         logging.debug(f"Executing script: {args} with command: {command}")
         return subprocess.check_output([command] + args, timeout=30).decode().strip() or None
@@ -110,7 +110,7 @@ def main():
 
     # Acquire Lock
     lock_file = acquire_lock()
-    
+
     # Read Cache
     cache = read_json(CACHE_FILE)
 
