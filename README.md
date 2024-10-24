@@ -11,8 +11,8 @@ oder
 ## Example Crontab
 Edit via crontab -e
 ```
-* * * * *       cd /bin/ddnsclient && python /bin/ddnsclient/ddns_updater.py
-@reboot         cd /bin/ddnsclient && python /bin/ddnsclient/ddns_updater.py
+* * * * *       cd /bin/ddnsclient && python /bin/ddnsclient/ddns_updater.py > /dev/null
+@reboot         cd /bin/ddnsclient && python /bin/ddnsclient/ddns_updater.py > /dev/null
 ```
 
 ## Config
