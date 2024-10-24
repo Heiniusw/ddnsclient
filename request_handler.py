@@ -51,7 +51,7 @@ def send_dyndns2_request(ipv4, ipv6_prefix, config):
         if ipv6:
             ips.append(ipv6)
 
-        url = f"https://{config['providerHost']}?hostname={domain['hostname']}&myip={','.join(ips)}"
+        url = f"https://{config['provider_host']}?hostname={domain['hostname']}&myip={','.join(ips)}"
 
         logger.debug(f"Sending Request: {url}")
         try:
