@@ -38,41 +38,49 @@ It also contains a list of Domains wich should be updated. A Hostname is require
     "modules": {
         "ipv4": {
             "command": "bash",
-            "script": "./modules/ipv4-fritzbox.sh"
+            "args": [
+                "./modules/ipv4-fritzbox.sh"
+            ]
         },
         "ipv6": {
             "command": "bash",
-            "script": "./modules/ipv6_prefix.sh"
+            "args": [
+                "./modules/ipv6_prefix.sh"
+            ]
         }
     },
     "providers": {
-        "dyndnsv2": {
-            "providerHost": "dyndns.host.com/nic/update",
-            "username": "example.com",
-            "password": "abcdefg",
-            "domains": [
-                {
-                    "hostname": "example.com",
-                    "ipv6_suffix": "abcd:efab:cdef:abcd"
-                },
-                {
-                    "hostname": "sub.example.com",
-                    "ipv6_suffix": "1234:5678:9012:3456"
-                },
-                {
-                    "hostname": "affe.example.com"
-                }
-            ]
-        },
-        "cloudflare": {
-            "zone_id": "023e105f4ecef8ad9ca31a8372d0c353",
-            "dns_record_id_ipv4": "023e105f4ecef8ad9ca31a8372d0c353",
-            "dns_record_id_ipv6": "023e105f4ecef8ad9ca31a8372d0c353",
-            "api_email": "max.musterman@example.com",
-            "api_key": "123abc",
-            "name": "example.com",
-            "ipv6_suffix": "1234:4321:1234:4321"
-        }
+        "dyndnsv2": [
+            {
+                "providerHost": "dyndns.host.com/nic/update",
+                "username": "example.com",
+                "password": "abcdefg",
+                "domains": [
+                    {
+                        "hostname": "example.com",
+                        "ipv6_suffix": "abcd:efab:cdef:abcd"
+                    },
+                    {
+                        "hostname": "sub.example.com",
+                        "ipv6_suffix": "1234:5678:9012:3456"
+                    },
+                    {
+                        "hostname": "affe.example.com"
+                    }
+                ]
+            }
+        ],
+        "cloudflare": [
+            {
+                "zone_id": "023e105f4ecef8ad9ca31a8372d0c353",
+                "dns_record_id_ipv4": "023e105f4ecef8ad9ca31a8372d0c353",
+                "dns_record_id_ipv6": "023e105f4ecef8ad9ca31a8372d0c353",
+                "api_email": "max.musterman@example.com",
+                "api_key": "123abc",
+                "name": "example.com",
+                "ipv6_suffix": "1234:4321:1234:4321"
+            }
+        ]
     }
 }
 ```
@@ -94,17 +102,19 @@ It also contains a list of Domains wich should be updated. A Hostname is require
         }
     },
     "providers": {
-        "dyndnsv2": {
-            "providerHost": "dyndns.host.com/nic/update",
-            "username": "example.com",
-            "password": "abcdefg",
-            "domains": [
-                {
-                    "hostname": "example.com",
-                    "ipv6_suffix": "abcd:efab:cdef:abcd"
-                }
-            ]
-        }
+        "dyndnsv2": [
+            {
+                "providerHost": "dyndns.host.com/nic/update",
+                "username": "example.com",
+                "password": "abcdefg",
+                "domains": [
+                    {
+                        "hostname": "example.com",
+                        "ipv6_suffix": "abcd:efab:cdef:abcd"
+                    }
+                ]
+            }
+        ]
     }
 }
 ```
