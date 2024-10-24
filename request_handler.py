@@ -61,6 +61,14 @@ def send_dyndns2_request(ipv4, ipv6_prefix, config):
         except requests.RequestException as e:
             logger.error(f"Failed to update {domain['hostname']}: {str(e)}")
 
-def handle_request(ipv4, ipv6_prefix, provider, config):
-    handlers = {"dyndnsv2": send_dyndns2_request, "cloudflare": send_cloudflare_request}
-    handlers[provider](ipv4, ipv6_prefix, config)
+def handle_request(ipv4, ipv6_prefix, provider, configs):
+    handlers = {
+        "dyndnsv2": send_dyndns2_request,
+        "cloudflare": send_cloudflare_request
+    }
+
+    if provider in handlers:
+        for config in configs:
+            handlers[provider](ipv4, ipv6_prefix, config)
+    else:
+        logging.error(f"Handler for provider '{provider}' is not implemented.")

@@ -28,13 +28,13 @@ def ensure_directory(file_path):
 
 def configure_logging(log_file, logging_level_str, log_rotation=False):
     ensure_directory(log_file)
-    
+
     logging_level = LOGGING_LEVELS.get(logging_level_str.upper(), logging.INFO)
-    
+
     # Configure the root logger
     logger = logging.getLogger()
     logger.setLevel(logging_level)
-    
+
     formatter = logging.Formatter('%(asctime)s - %(levelname)s > %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
     # Create a stream handler for stdout and add it
@@ -85,8 +85,9 @@ def execute_script(module):
         return None
 
 def update(providers, ipv4, ipv6_prefix):
-    for provider, config in providers.items():
-        handle_request(ipv4, ipv6_prefix, provider, config)
+    for provider, configs in providers.items():
+        logging.debug(f"Handling provider {provider}")
+        handle_request(ipv4, ipv6_prefix, provider, configs)
     logging.info("DynDNS update Done.")
 
 def write_json(config, filename='config.ini'):
@@ -121,7 +122,7 @@ def main():
     # Get Current IPs
     new_ipv4 = None
     new_ipv6_prefix = None
-    
+
     ipv4_module = config["modules"].get("ipv4")
     if ipv4_module:
         new_ipv4 = execute_script(ipv4_module) or None
